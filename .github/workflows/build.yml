@@ -411,7 +411,7 @@ jobs:
     - name: Build with meson + ninja
       shell: cmd
       run: |
-        call meson -Dsdb_cgen=false -Dstatic_runtime=true -Dblob=true -Denable_r2r=false -Denable_tests=false --cross-file .github/meson-windows-${{ matrix.arch }}.ini
+        call meson setup -Dsdb_cgen=false -Dstatic_runtime=true -Dblob=true -Denable_r2r=false -Denable_tests=false --cross-file .github/meson-windows-${{ matrix.arch }}.ini
         call make
     - if: ${{ matrix.arch == 'x64' }}
       name: Test executable

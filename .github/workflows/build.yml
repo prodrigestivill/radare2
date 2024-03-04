@@ -296,84 +296,84 @@ jobs:
 
 
   # Windows
-  windows-meson:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - id: w64
-            arch: x64
-            win: 2019
-          # - id: w64-2022
-          #   arch: x64
-          #   win: 2022
-          # - id: w64-arm64-2022
-          #   arch: amd64_arm64
-          #   win: 2022
-          - id: w32
-            arch: amd64_x86
-            win: 2019
-    runs-on: windows-${{ matrix.win }}
-    steps:
-    - name: Win configure Pagefile
-      uses: al-cheb/configure-pagefile-action@v1.4
-      with:
-          minimum-size: 16GB
-          maximum-size: 16GB
-          disk-root: "C:"
-    - name: Checkout
-      uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
-    - name: Preparing nmake
-      uses: ilammy/msvc-dev-cmd@v1
-      with:
-        arch: ${{ matrix.arch }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install meson==0.64.1 ninja r2pipe wget
-    - name: Extract r2 version
-      shell: bash
-      run: echo "branch=`sys/version.py -n`" >> $GITHUB_OUTPUT
-      id: r2v
-    - name: Build with meson + ninja
-      shell: pwsh
-      run: |
-        # meson_options: --default-library=shared|static -Dstatic_runtime=true --backend vs2019
-        meson --buildtype=release --prefix=$PWD\radare2-${{ steps.r2v.outputs.branch }}-${{ matrix.id }} build
-        ninja -C build -j 1
-        ninja -C build install
-    - name: Create zip artifact
-      run: 7z a radare2-${{ steps.r2v.outputs.branch }}-${{ matrix.id }}.zip $PWD\radare2-${{ steps.r2v.outputs.branch }}-${{ matrix.id }}
-#    - uses: actions/checkout@v4
-#      with:
-#        repository: radareorg/radare2-win-installer
-#        path: ./radare2-win-installer
-#    - name: Create installer
-#      shell: pwsh
-#      run: |
-#         iscc radare2-win-installer\radare2.iss /DRadare2Location=..\radare2-install\* /DLicenseLocation=..\COPYING.LESSER /DIcoLocation=radare2.ico /DMyAppVersion=${{ steps.r2v.outputs.branch }}
-#         Move-Item -path radare2-win-installer\Output\radare2.exe
-    - uses: actions/upload-artifact@v4
-      with:
-        name: windows-meson-${{ matrix.arch }}-${{ matrix.win }}
-        path: |
-          radare2-${{ steps.r2v.outputs.branch }}-${{ matrix.id }}.zip
-#          radare2.exe
+#   windows-meson:
+#     strategy:
+#       fail-fast: false
+#       matrix:
+#         include:
+#           - id: w64
+#             arch: x64
+#             win: 2019
+#           # - id: w64-2022
+#           #   arch: x64
+#           #   win: 2022
+#           # - id: w64-arm64-2022
+#           #   arch: amd64_arm64
+#           #   win: 2022
+#           - id: w32
+#             arch: amd64_x86
+#             win: 2019
+#     runs-on: windows-${{ matrix.win }}
+#     steps:
+#     - name: Win configure Pagefile
+#       uses: al-cheb/configure-pagefile-action@v1.4
+#       with:
+#           minimum-size: 16GB
+#           maximum-size: 16GB
+#           disk-root: "C:"
+#     - name: Checkout
+#       uses: actions/checkout@v4
+#     - uses: actions/setup-python@v5
+#       with:
+#         python-version: '3.10'
+#     - name: Preparing nmake
+#       uses: ilammy/msvc-dev-cmd@v1
+#       with:
+#         arch: ${{ matrix.arch }}
+#     - name: Install dependencies
+#       run: |
+#         python -m pip install --upgrade pip
+#         pip install meson==1.3.2 ninja r2pipe wget
+#     - name: Extract r2 version
+#       shell: bash
+#       run: echo "branch=`sys/version.py -n`" >> $GITHUB_OUTPUT
+#       id: r2v
+#     - name: Build with meson + ninja
+#       shell: pwsh
+#       run: |
+#         # meson_options: --default-library=shared|static -Dstatic_runtime=true --backend vs2019
+#         meson --buildtype=release --prefix=$PWD\radare2-${{ steps.r2v.outputs.branch }}-${{ matrix.id }} build
+#         ninja -C build -j 1
+#         ninja -C build install
+#     - name: Create zip artifact
+#       run: 7z a radare2-${{ steps.r2v.outputs.branch }}-${{ matrix.id }}.zip $PWD\radare2-${{ steps.r2v.outputs.branch }}-${{ matrix.id }}
+# #    - uses: actions/checkout@v4
+# #      with:
+# #        repository: radareorg/radare2-win-installer
+# #        path: ./radare2-win-installer
+# #    - name: Create installer
+# #      shell: pwsh
+# #      run: |
+# #         iscc radare2-win-installer\radare2.iss /DRadare2Location=..\radare2-install\* /DLicenseLocation=..\COPYING.LESSER /DIcoLocation=radare2.ico /DMyAppVersion=${{ steps.r2v.outputs.branch }}
+# #         Move-Item -path radare2-win-installer\Output\radare2.exe
+#     - uses: actions/upload-artifact@v4
+#       with:
+#         name: windows-meson-${{ matrix.arch }}-${{ matrix.win }}
+#         path: |
+#           radare2-${{ steps.r2v.outputs.branch }}-${{ matrix.id }}.zip
+# #          radare2.exe
 
   windows-static:
     strategy:
       fail-fast: false
       matrix:
         include:
-          - id: w64
-            arch: x64
-            win: 2019
-          - id: w64-2022
-            arch: x64
-            win: 2022
+          # - id: w64
+          #   arch: x64
+          #   win: 2019
+          # - id: w64-2022
+          #   arch: x64
+          #   win: 2022
           - id: w64-arm64-2022
             arch: amd64_arm64
             win: 2022
@@ -400,7 +400,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install meson==0.64.1 ninja r2pipe wget r2env
+        pip install meson==1.3.2 ninja r2pipe wget r2env
     - name: Extract r2 version
       shell: bash
       run: echo "branch=`sys/version.py -n`" >> $GITHUB_OUTPUT
@@ -411,7 +411,7 @@ jobs:
     - name: Build with meson + ninja
       shell: cmd
       run: |
-        call configure static
+        call meson -Dsdb_cgen=false -Dstatic_runtime=true -Dblob=true -Denable_r2r=false -Denable_tests=false --cross-file .github/meson-windows-${{ matrix.arch }}.ini
         call make
     - if: ${{ matrix.arch == 'x64' }}
       name: Test executable

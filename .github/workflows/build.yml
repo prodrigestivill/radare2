@@ -7,106 +7,106 @@ on:
   pull_request:
 
 jobs:
-  # WASI
-  linux-wasi:
-    runs-on: ubuntu-20.04
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-    - name: Installing with symlinks
-      run: sys/wasi.sh
-    - uses: actions/upload-artifact@v4
-      with:
-        name: linux-wasi
-        path: radare2-*-wasi.zip
+  # # WASI
+  # linux-wasi:
+  #   runs-on: ubuntu-20.04
+  #   steps:
+  #   - name: Checkout
+  #     uses: actions/checkout@v4
+  #   - name: Installing with symlinks
+  #     run: sys/wasi.sh
+  #   - uses: actions/upload-artifact@v4
+  #     with:
+  #       name: linux-wasi
+  #       path: radare2-*-wasi.zip
 
-  # Source Tarballs
-  tarball:
-    runs-on: ubuntu-20.04
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-    - name: Creating zip and tarball
-      run: sys/tarball.sh
-    - uses: actions/upload-artifact@v4
-      with:
-        name: tarball
-        path: radare2-?.?.?.*
+  # # Source Tarballs
+  # tarball:
+  #   runs-on: ubuntu-20.04
+  #   steps:
+  #   - name: Checkout
+  #     uses: actions/checkout@v4
+  #   - name: Creating zip and tarball
+  #     run: sys/tarball.sh
+  #   - uses: actions/upload-artifact@v4
+  #     with:
+  #       name: tarball
+  #       path: radare2-?.?.?.*
 
-  # Linux
-  linux-static:
-    runs-on: ubuntu-20.04
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-    - name: Extract r2 version
-      shell: bash
-      run: echo "branch=`sys/version.py -n`" >> $GITHUB_OUTPUT
-      id: r2v
-    - name: Installing the musl runtime
-      run: |
-        sudo apt update --assume-yes
-        sudo apt install --assume-yes musl-tools
-    - name: Building static r2 with acr
-      run: |
-        cp -f dist/plugins-cfg/plugins.static.nogpl.cfg plugins.cfg
-        NOLTO=1 sys/static.sh
-        # NOLTO=1 sys/static.sh
-        make -C binr/blob
-        tar cJvf radare2-${{ steps.r2v.outputs.branch }}-static.tar.xz r2-static
-    - name: Pub
-      uses: actions/upload-artifact@v4
-      with:
-        name: linux-static
-        path: radare2-*-static.tar.xz
+  # # Linux
+  # linux-static:
+  #   runs-on: ubuntu-20.04
+  #   steps:
+  #   - name: Checkout
+  #     uses: actions/checkout@v4
+  #   - name: Extract r2 version
+  #     shell: bash
+  #     run: echo "branch=`sys/version.py -n`" >> $GITHUB_OUTPUT
+  #     id: r2v
+  #   - name: Installing the musl runtime
+  #     run: |
+  #       sudo apt update --assume-yes
+  #       sudo apt install --assume-yes musl-tools
+  #   - name: Building static r2 with acr
+  #     run: |
+  #       cp -f dist/plugins-cfg/plugins.static.nogpl.cfg plugins.cfg
+  #       NOLTO=1 sys/static.sh
+  #       # NOLTO=1 sys/static.sh
+  #       make -C binr/blob
+  #       tar cJvf radare2-${{ steps.r2v.outputs.branch }}-static.tar.xz r2-static
+  #   - name: Pub
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: linux-static
+  #       path: radare2-*-static.tar.xz
 
-  linux-acr-rpm-64:
-    # if: contains(github.ref, 'master') || contains(github.ref, 'ci-')
-    runs-on: ubuntu-20.04
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-    - name: Packaging for RPM
-      run: make -C dist/rpm
-    - name: Pub
-      uses: actions/upload-artifact@v4
-      with:
-        name: linux-acr-rpm-64
-        path: dist/rpm/*.rpm
+  # linux-acr-rpm-64:
+  #   # if: contains(github.ref, 'master') || contains(github.ref, 'ci-')
+  #   runs-on: ubuntu-20.04
+  #   steps:
+  #   - name: Checkout
+  #     uses: actions/checkout@v4
+  #   - name: Packaging for RPM
+  #     run: make -C dist/rpm
+  #   - name: Pub
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: linux-acr-rpm-64
+  #       path: dist/rpm/*.rpm
 
-  linux-acr-deb:
-    # if: contains(github.ref, 'master') || contains(github.ref, 'ci-')
-    strategy:
-      fail-fast: false
-      matrix:
-        arch:
-          - amd64
-          - arm64
-          - i386
-        include:
-          - arch: arm64
-            gcc: aarch64-linux-gnu
-          - arch: i386
-            gcc: multilib
-    runs-on: ubuntu-20.04
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-    - if: ${{ matrix.gcc }}
-      name: Installing crosscompiler
-      run: |
-        sudo apt update --assume-yes
-        sudo apt install --assume-yes gcc-${{ matrix.gcc }} gperf
-    - name: Packaging for Debian
-      run: |
-        gcc -v
-        sys/debian.sh ${{ matrix.arch }}
-        mv -v dist/debian/*/radare2*.deb .
-    - name: Pub
-      uses: actions/upload-artifact@v4
-      with:
-        name: linux-acr-deb-${{ matrix.arch }}
-        path: radare2*.deb
+  # linux-acr-deb:
+  #   # if: contains(github.ref, 'master') || contains(github.ref, 'ci-')
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       arch:
+  #         - amd64
+  #         - arm64
+  #         - i386
+  #       include:
+  #         - arch: arm64
+  #           gcc: aarch64-linux-gnu
+  #         - arch: i386
+  #           gcc: multilib
+  #   runs-on: ubuntu-20.04
+  #   steps:
+  #   - name: Checkout
+  #     uses: actions/checkout@v4
+  #   - if: ${{ matrix.gcc }}
+  #     name: Installing crosscompiler
+  #     run: |
+  #       sudo apt update --assume-yes
+  #       sudo apt install --assume-yes gcc-${{ matrix.gcc }} gperf
+  #   - name: Packaging for Debian
+  #     run: |
+  #       gcc -v
+  #       sys/debian.sh ${{ matrix.arch }}
+  #       mv -v dist/debian/*/radare2*.deb .
+  #   - name: Pub
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: linux-acr-deb-${{ matrix.arch }}
+  #       path: radare2*.deb
 
 ## RPM PACKAGES DISABLED
 #  linux-meson-rpm:
@@ -164,135 +164,135 @@ jobs:
 
 
   # macOS
-  macos-acr:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - arch: arm64
-            macos: 12
-          - arch: x86_64
-            macos: 11
-    runs-on: macos-${{ matrix.macos }}
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-    - name: Install pkg-config with Homebrew
-      run: brew install pkg-config
-    - name: Packaging
-      env:
-        ARCHFLAGS: '-arch ${{ matrix.arch }}'
-        CC: gcc -arch ${{ matrix.arch }}
-      run: dist/macos/build-pkg.sh
-    - name: Pub
-      uses: actions/upload-artifact@v4
-      with:
-        path: dist/macos/*.pkg
-        name: macos-acr-${{ matrix.arch }}
+  # macos-acr:
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       include:
+  #         - arch: arm64
+  #           macos: 12
+  #         - arch: x86_64
+  #           macos: 11
+  #   runs-on: macos-${{ matrix.macos }}
+  #   steps:
+  #   - name: Checkout
+  #     uses: actions/checkout@v4
+  #   - name: Install pkg-config with Homebrew
+  #     run: brew install pkg-config
+  #   - name: Packaging
+  #     env:
+  #       ARCHFLAGS: '-arch ${{ matrix.arch }}'
+  #       CC: gcc -arch ${{ matrix.arch }}
+  #     run: dist/macos/build-pkg.sh
+  #   - name: Pub
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       path: dist/macos/*.pkg
+  #       name: macos-acr-${{ matrix.arch }}
 
-  ios:
-    if: contains(github.ref, 'master') || contains(github.ref, 'ci-')
-    strategy:
-      fail-fast: false
-      matrix:
-        type:
-          - cydia
-          - cydia32
-        include:
-          - type: cydia
-            sdk: true
-    runs-on: macos-11
-    steps:
-    - uses: actions/checkout@v4
-    - name: Install pkg-config/ldid2 with Homebrew
-      run: brew install pkg-config ldid
-    - name: Extract r2 version
-      shell: bash
-      run: echo "branch=`sys/version.py -n`" >> $GITHUB_OUTPUT
-      id: r2v
-    - name: Create ${{ matrix.type }} package
-      run: ./sys/ios-${{ matrix.type }}.sh
-    - if: ${{ matrix.sdk }}
-      name: Create iOS SDK
-      run: |
-        ./sys/ios-sdk.sh
-        pushd /tmp/r2ios
-        zip -r /tmp/r2ios-sdk.zip *
-        popd
-        mv /tmp/r2ios-sdk.zip dist/cydia/radare2/r2ios-sdk-${{ steps.r2v.outputs.branch }}.zip
-    - uses: actions/upload-artifact@v4
-      with:
-        name: ios-${{ matrix.type }}
-        path: |
-          ./dist/cydia/radare2/r2ios-sdk-*.zip
-          ./dist/cydia/radare2/*.deb
+  # ios:
+  #   if: contains(github.ref, 'master') || contains(github.ref, 'ci-')
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       type:
+  #         - cydia
+  #         - cydia32
+  #       include:
+  #         - type: cydia
+  #           sdk: true
+  #   runs-on: macos-11
+  #   steps:
+  #   - uses: actions/checkout@v4
+  #   - name: Install pkg-config/ldid2 with Homebrew
+  #     run: brew install pkg-config ldid
+  #   - name: Extract r2 version
+  #     shell: bash
+  #     run: echo "branch=`sys/version.py -n`" >> $GITHUB_OUTPUT
+  #     id: r2v
+  #   - name: Create ${{ matrix.type }} package
+  #     run: ./sys/ios-${{ matrix.type }}.sh
+  #   - if: ${{ matrix.sdk }}
+  #     name: Create iOS SDK
+  #     run: |
+  #       ./sys/ios-sdk.sh
+  #       pushd /tmp/r2ios
+  #       zip -r /tmp/r2ios-sdk.zip *
+  #       popd
+  #       mv /tmp/r2ios-sdk.zip dist/cydia/radare2/r2ios-sdk-${{ steps.r2v.outputs.branch }}.zip
+  #   - uses: actions/upload-artifact@v4
+  #     with:
+  #       name: ios-${{ matrix.type }}
+  #       path: |
+  #         ./dist/cydia/radare2/r2ios-sdk-*.zip
+  #         ./dist/cydia/radare2/*.deb
 
-  # Android
-  android-acr:
-    if: contains(github.ref, 'master') || contains(github.ref, 'ci-')
-    strategy:
-      fail-fast: false
-      matrix:
-        arch:
-          - aarch64
-          - arm
-        include: # Force API 16 only for ARM (32 bits)
-          - arch: arm
-            api: 16
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - name: Install dependencies
-      run: |
-        sudo apt-get --assume-yes update
-        sudo apt-get --assume-yes install pax wget gperf cabextract unzip python3-wheel python3-setuptools python3-pip
-        pip3 install --user meson ninja
-    - name: Compile with acr
-      run: |
-        sys/android-ndk-install.sh "${{ matrix.api }}" "${{ matrix.arch }}"
-        sys/android-build.sh "${{ matrix.arch }}"
-        ls -l
-    - uses: actions/upload-artifact@v4
-      with:
-        name: android-acr-${{ matrix.arch }}
-        path: radare2*android*${{ matrix.arch }}.tar.gz
+  # # Android
+  # android-acr:
+  #   if: contains(github.ref, 'master') || contains(github.ref, 'ci-')
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       arch:
+  #         - aarch64
+  #         - arm
+  #       include: # Force API 16 only for ARM (32 bits)
+  #         - arch: arm
+  #           api: 16
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v4
+  #   - name: Install dependencies
+  #     run: |
+  #       sudo apt-get --assume-yes update
+  #       sudo apt-get --assume-yes install pax wget gperf cabextract unzip python3-wheel python3-setuptools python3-pip
+  #       pip3 install --user meson ninja
+  #   - name: Compile with acr
+  #     run: |
+  #       sys/android-ndk-install.sh "${{ matrix.api }}" "${{ matrix.arch }}"
+  #       sys/android-build.sh "${{ matrix.arch }}"
+  #       ls -l
+  #   - uses: actions/upload-artifact@v4
+  #     with:
+  #       name: android-acr-${{ matrix.arch }}
+  #       path: radare2*android*${{ matrix.arch }}.tar.gz
 
-  # disabled because the ndk link is broken for a while
-  android-meson:
-    if: contains(github.ref, 'android')
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        arch:
-          - x86_64
-          # - aarch64
-          # - arm
-    steps:
-    - uses: actions/checkout@v4
-    - name: Install dependencies
-      run: |
-        sudo apt-get --assume-yes update
-        sudo apt-get --assume-yes install pax wget cabextract unzip python3-wheel python3-setuptools python3-pip
-        pip3 install --user meson ninja
-    - name: Extract r2 version
-      shell: bash
-      run: echo "branch=`sys/version.py -n`" >> $GITHUB_OUTPUT
-      id: r2v
-    - name: Compile with meson
-      run: |
-        export PATH=${HOME}/.local/bin:${PATH}
-        CFLAGS="-static" LDFLAGS="-static" meson --buildtype release --default-library static --prefix=/tmp/android-dir -Dblob=true build --cross-file .github/meson-android-${{ matrix.arch }}.ini
-        ninja -C build && ninja -C build install
-    - name: Create radare2-${{ steps.r2v.outputs.branch }}-android-${{ matrix.arch }}.tar.gz
-      run: |
-        cd /tmp
-        rm -rf android-dir/include android-dir/lib
-        tar --transform 's/android-dir/data\/data\/org.radareorg.radare2installer/g' -czvf radare2-${{ steps.r2v.outputs.branch }}-android-${{ matrix.arch }}.tar.gz android-dir/
-    - uses: actions/upload-artifact@v4
-      with:
-        name: android-meson-${{ matrix.arch }}
-        path: /tmp/radare2-${{ steps.r2v.outputs.branch }}-android-${{ matrix.arch }}.tar.gz
+  # # disabled because the ndk link is broken for a while
+  # android-meson:
+  #   if: contains(github.ref, 'android')
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       arch:
+  #         - x86_64
+  #         # - aarch64
+  #         # - arm
+  #   steps:
+  #   - uses: actions/checkout@v4
+  #   - name: Install dependencies
+  #     run: |
+  #       sudo apt-get --assume-yes update
+  #       sudo apt-get --assume-yes install pax wget cabextract unzip python3-wheel python3-setuptools python3-pip
+  #       pip3 install --user meson ninja
+  #   - name: Extract r2 version
+  #     shell: bash
+  #     run: echo "branch=`sys/version.py -n`" >> $GITHUB_OUTPUT
+  #     id: r2v
+  #   - name: Compile with meson
+  #     run: |
+  #       export PATH=${HOME}/.local/bin:${PATH}
+  #       CFLAGS="-static" LDFLAGS="-static" meson --buildtype release --default-library static --prefix=/tmp/android-dir -Dblob=true build --cross-file .github/meson-android-${{ matrix.arch }}.ini
+  #       ninja -C build && ninja -C build install
+  #   - name: Create radare2-${{ steps.r2v.outputs.branch }}-android-${{ matrix.arch }}.tar.gz
+  #     run: |
+  #       cd /tmp
+  #       rm -rf android-dir/include android-dir/lib
+  #       tar --transform 's/android-dir/data\/data\/org.radareorg.radare2installer/g' -czvf radare2-${{ steps.r2v.outputs.branch }}-android-${{ matrix.arch }}.tar.gz android-dir/
+  #   - uses: actions/upload-artifact@v4
+  #     with:
+  #       name: android-meson-${{ matrix.arch }}
+  #       path: /tmp/radare2-${{ steps.r2v.outputs.branch }}-android-${{ matrix.arch }}.tar.gz
 
 
   # Windows
@@ -499,41 +499,41 @@ jobs:
 #          radare2-win-installer\Output\radare2.exe
 
 
-  # FreeBSD
-  freebsd:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - name: Extract r2 version
-      shell: bash
-      run: echo "branch=`sys/version.py -n`" >> $GITHUB_OUTPUT
-      id: r2v
-    - name: Build r2 in FreeBSD
-      id: build
-      uses: vmactions/freebsd-vm@v1
-      with:
-        usesh: true
-        prepare: pkg install -y curl gmake patch git python gawk
-        run: |
-          cd work || true
-          pwd
-          ls -lah
-          whoami
-          env
-          freebsd-version
-          echo DATE: ; date
-          pip install r2pipe
-          sys/install.sh
-          gmake install DESTDIR=/tmp/prefix
-          (cd /tmp/prefix ; tar czvf /tmp/radare2-freebsd.tgz *)
-          r2r test/db/cmd
-          rm -rf * .git*
-          cp /tmp/radare2-freebsd.tgz radare2-${{ steps.r2v.outputs.branch }}-freebsd.tgz
-          echo DATE: ; date
-    - uses: actions/upload-artifact@v4
-      with:
-        name: freebsd
-        path: radare2-*-freebsd.tgz
+  # # FreeBSD
+  # freebsd:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v4
+  #   - name: Extract r2 version
+  #     shell: bash
+  #     run: echo "branch=`sys/version.py -n`" >> $GITHUB_OUTPUT
+  #     id: r2v
+  #   - name: Build r2 in FreeBSD
+  #     id: build
+  #     uses: vmactions/freebsd-vm@v1
+  #     with:
+  #       usesh: true
+  #       prepare: pkg install -y curl gmake patch git python gawk
+  #       run: |
+  #         cd work || true
+  #         pwd
+  #         ls -lah
+  #         whoami
+  #         env
+  #         freebsd-version
+  #         echo DATE: ; date
+  #         pip install r2pipe
+  #         sys/install.sh
+  #         gmake install DESTDIR=/tmp/prefix
+  #         (cd /tmp/prefix ; tar czvf /tmp/radare2-freebsd.tgz *)
+  #         r2r test/db/cmd
+  #         rm -rf * .git*
+  #         cp /tmp/radare2-freebsd.tgz radare2-${{ steps.r2v.outputs.branch }}-freebsd.tgz
+  #         echo DATE: ; date
+  #   - uses: actions/upload-artifact@v4
+  #     with:
+  #       name: freebsd
+  #       path: radare2-*-freebsd.tgz
 
 
 # R2_590 - uncomment after the 590 release
@@ -590,91 +590,91 @@ jobs:
 #        done
 
 
-  # Release creation
-  check_release:
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
-    outputs:
-      is_release: ${{ steps.release.outputs.is }}
-      tag_name: ${{ steps.release.outputs.tag }}
-    needs:
-      - linux-wasi
-      - tarball
-      - linux-static
-#      - linux-acr-rpm-64
-      - linux-acr-deb
-      - macos-acr
-      - ios
-      - android-acr
-#      - android-meson
-      - w32-meson
-      - w64-meson
-      - w64-static
-      - freebsd
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Download all git history and tags
-      - name: Check if is a release
-        run: |
-          TAG="`git describe --exact-match --tags ${{ github.sha }} || true`"
-          if [ -n "$TAG" ]; then
-            echo "tag=$TAG" >> $GITHUB_OUTPUT
-            echo "is=yes" >> $GITHUB_OUTPUT
-          else
-            echo "is=no" >> $GITHUB_OUTPUT
-          fi
-        id: release
+#   # Release creation
+#   check_release:
+#     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+#     outputs:
+#       is_release: ${{ steps.release.outputs.is }}
+#       tag_name: ${{ steps.release.outputs.tag }}
+#     needs:
+#       - linux-wasi
+#       - tarball
+#       - linux-static
+# #      - linux-acr-rpm-64
+#       - linux-acr-deb
+#       - macos-acr
+#       - ios
+#       - android-acr
+# #      - android-meson
+#       - w32-meson
+#       - w64-meson
+#       - w64-static
+#       - freebsd
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 0 # Download all git history and tags
+#       - name: Check if is a release
+#         run: |
+#           TAG="`git describe --exact-match --tags ${{ github.sha }} || true`"
+#           if [ -n "$TAG" ]; then
+#             echo "tag=$TAG" >> $GITHUB_OUTPUT
+#             echo "is=yes" >> $GITHUB_OUTPUT
+#           else
+#             echo "is=no" >> $GITHUB_OUTPUT
+#           fi
+#         id: release
 
-  release:
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && needs.check_release.outputs.is_release == 'yes' }}
-    needs:
-      - check_release
-    runs-on: ubuntu-latest
-    env:
-      ASSET_FILES: |
-        dist/artifacts/tarball/*.tar.xz
-        dist/artifacts/linux-acr-deb-*/radare2_*.deb
-        dist/artifacts/w64-meson/*.zip
-        dist/artifacts/w32-meson/*.zip
-        dist/artifacts/macos-acr-*/*.pkg
-        dist/artifacts/ios-cydia/*.deb
-        dist/artifacts/ios-cydia32/*.deb
-        dist/artifacts/ios-cydia/r2ios-sdk-*.zip
-        dist/artifacts/android-acr-*/*.tar.gz
-        dist/artifacts/linux-static/*.tar.xz
-        dist/artifacts/linux-acr-deb-*/radare2-dev_*.deb
-        dist/artifacts/linux-wasi/*.zip
-        dist/artifacts/w64-static/*.zip
-        dist/artifacts/freebsd/*.tgz
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Download all git history and tags
-      - name: Extract r2 version
-        shell: bash
-        run: echo "branch=`sys/version.py -n`" >> $GITHUB_OUTPUT
-        id: r2v
-      - name: Prepare release notes
-        run: ./sys/release-notes.sh | tee ./RELEASE_NOTES.md
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: dist/artifacts
-      - name: Generate checksums
-        run: sha256sum $ASSET_FILES | awk '{sub(".*/", "", $2); print $1"  "$2}' > checksums.txt
-      - name: Create GitHub release
-        id: create_release
-        uses: softprops/action-gh-release@975c1b265e11dd76618af1c374e7981f9a6ff44a
-        with:
-          name: ${{ steps.r2v.outputs.branch }}
-          tag_name: ${{ needs.check_release.outputs.tag_name }}
-          body_path: ./RELEASE_NOTES.md
-          draft: false
-          prerelease: false
-          generate_release_notes: false
-          files: |
-            ${{ env.ASSET_FILES }}
-            checksums.txt
+#   release:
+#     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && needs.check_release.outputs.is_release == 'yes' }}
+#     needs:
+#       - check_release
+#     runs-on: ubuntu-latest
+#     env:
+#       ASSET_FILES: |
+#         dist/artifacts/tarball/*.tar.xz
+#         dist/artifacts/linux-acr-deb-*/radare2_*.deb
+#         dist/artifacts/w64-meson/*.zip
+#         dist/artifacts/w32-meson/*.zip
+#         dist/artifacts/macos-acr-*/*.pkg
+#         dist/artifacts/ios-cydia/*.deb
+#         dist/artifacts/ios-cydia32/*.deb
+#         dist/artifacts/ios-cydia/r2ios-sdk-*.zip
+#         dist/artifacts/android-acr-*/*.tar.gz
+#         dist/artifacts/linux-static/*.tar.xz
+#         dist/artifacts/linux-acr-deb-*/radare2-dev_*.deb
+#         dist/artifacts/linux-wasi/*.zip
+#         dist/artifacts/w64-static/*.zip
+#         dist/artifacts/freebsd/*.tgz
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 0 # Download all git history and tags
+#       - name: Extract r2 version
+#         shell: bash
+#         run: echo "branch=`sys/version.py -n`" >> $GITHUB_OUTPUT
+#         id: r2v
+#       - name: Prepare release notes
+#         run: ./sys/release-notes.sh | tee ./RELEASE_NOTES.md
+#       - name: Download artifacts
+#         uses: actions/download-artifact@v4
+#         with:
+#           path: dist/artifacts
+#       - name: Generate checksums
+#         run: sha256sum $ASSET_FILES | awk '{sub(".*/", "", $2); print $1"  "$2}' > checksums.txt
+#       - name: Create GitHub release
+#         id: create_release
+#         uses: softprops/action-gh-release@975c1b265e11dd76618af1c374e7981f9a6ff44a
+#         with:
+#           name: ${{ steps.r2v.outputs.branch }}
+#           tag_name: ${{ needs.check_release.outputs.tag_name }}
+#           body_path: ./RELEASE_NOTES.md
+#           draft: false
+#           prerelease: false
+#           generate_release_notes: false
+#           files: |
+#             ${{ env.ASSET_FILES }}
+#             checksums.txt

@@ -409,10 +409,11 @@ jobs:
       shell: cmd
       run: preconfigure
     - name: Build with meson + ninja
-      shell: cmd
+      shell: pwsh
       run: |
-        call meson setup -Dsdb_cgen=false -Dstatic_runtime=true -Dblob=true -Denable_r2r=false -Denable_tests=false --cross-file .github/meson-windows-${{ matrix.arch }}.ini
-        call make
+        meson setup -Dsdb_cgen=false -Dstatic_runtime=true -Dblob=true -Denable_r2r=false -Denable_tests=false --cross-file .github/meson-windows-${{ matrix.arch }}.ini build
+        ninja -C build -j 1
+        ninja -C build install
     - if: ${{ matrix.arch == 'x64' }}
       name: Test executable
       continue-on-error: true

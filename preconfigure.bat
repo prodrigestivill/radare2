@@ -97,7 +97,7 @@ IF "%~1"=="" (
 ECHO VSARCH is set to: !VSARCH!
 
 echo === Finding Visual Studio...
-cl --help > NUL 2> NUL
+clang --help > NUL 2> NUL
 if %ERRORLEVEL% == 0 (
   echo FOUND
 ) else (

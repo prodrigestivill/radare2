@@ -406,9 +406,8 @@ jobs:
       run: echo "branch=`sys/version.py -n`" >> $GITHUB_OUTPUT
       id: r2v
     - name: preconfigure
-      continue-on-error: true
       shell: cmd
-      run: preconfigure ${{ matrix.arch }}
+      run: preconfigure
     - name: Build with meson + ninja
       shell: cmd
       run: |

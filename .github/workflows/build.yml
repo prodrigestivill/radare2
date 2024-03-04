@@ -500,40 +500,40 @@ jobs:
 
 
   # FreeBSD
-#  freebsd:
-#    runs-on: ubuntu-latest
-#    steps:
-#    - uses: actions/checkout@v4
-#    - name: Extract r2 version
-#      shell: bash
-#      run: echo "branch=`sys/version.py -n`" >> $GITHUB_OUTPUT
-#      id: r2v
-#    - name: Build r2 in FreeBSD
-#      id: build
-#      uses: vmactions/freebsd-vm@v1
-#      with:
-#        usesh: true
-#        prepare: pkg install -y curl gmake patch git python gawk
-#        run: |
-#          cd work || true
-#          pwd
-#          ls -lah
-#          whoami
-#          env
-#          freebsd-version
-#          echo DATE: ; date
-#          pip install r2pipe
-#          sys/install.sh
-#          gmake install DESTDIR=/tmp/prefix
-#          (cd /tmp/prefix ; tar czvf /tmp/radare2-freebsd.tgz *)
-#          r2r test/db/cmd
-#          rm -rf * .git*
-#          cp /tmp/radare2-freebsd.tgz radare2-${{ steps.r2v.outputs.branch }}-freebsd.tgz
-#          echo DATE: ; date
-#    - uses: actions/upload-artifact@v4
-#      with:
-#        name: freebsd
-#        path: radare2-*-freebsd.tgz
+  freebsd:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Extract r2 version
+      shell: bash
+      run: echo "branch=`sys/version.py -n`" >> $GITHUB_OUTPUT
+      id: r2v
+    - name: Build r2 in FreeBSD
+      id: build
+      uses: vmactions/freebsd-vm@v1
+      with:
+        usesh: true
+        prepare: pkg install -y curl gmake patch git python gawk
+        run: |
+          cd work || true
+          pwd
+          ls -lah
+          whoami
+          env
+          freebsd-version
+          echo DATE: ; date
+          pip install r2pipe
+          sys/install.sh
+          gmake install DESTDIR=/tmp/prefix
+          (cd /tmp/prefix ; tar czvf /tmp/radare2-freebsd.tgz *)
+          r2r test/db/cmd
+          rm -rf * .git*
+          cp /tmp/radare2-freebsd.tgz radare2-${{ steps.r2v.outputs.branch }}-freebsd.tgz
+          echo DATE: ; date
+    - uses: actions/upload-artifact@v4
+      with:
+        name: freebsd
+        path: radare2-*-freebsd.tgz
 
 
 # R2_590 - uncomment after the 590 release
@@ -609,7 +609,7 @@ jobs:
       - w32-meson
       - w64-meson
       - w64-static
-#      - freebsd
+      - freebsd
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -647,6 +647,7 @@ jobs:
         dist/artifacts/linux-acr-deb-*/radare2-dev_*.deb
         dist/artifacts/linux-wasi/*.zip
         dist/artifacts/w64-static/*.zip
+        dist/artifacts/freebsd/*.tgz
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
